@@ -14,6 +14,7 @@ type Request interface {
 
 func bindData(c *gin.Context, req Request) bool {
 	if err := c.ShouldBind(req); err != nil {
+		// TODO: 内部错误待修改
 		c.JSON(apperrors.Status(err), gin.H{
 			"error": err,
 		})
@@ -33,6 +34,7 @@ func bindData(c *gin.Context, req Request) bool {
 			fErrors = append(fErrors, er)
 		}
 
+		// TODO: 内部参数错误待修改
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": fErrors,
 		})

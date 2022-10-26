@@ -57,15 +57,13 @@ func (h *Handler) Register(c *gin.Context) {
 			toFieldErrorResponse(c, "Email", apperrors.DuplicateEmail)
 			return
 		}
-		c.JSON(apperrors.Status(err), gin.H{
-			"error": err,
-		})
+		c.JSON(apperrors.Status(err), err)
 		return
 	}
 
 	setUserSession(c, user.ID)
 
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusCreated, appresponse.New(user))
 }
 
 type loginReq struct {

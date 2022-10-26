@@ -53,11 +53,11 @@ func Status(err error) int {
 	return http.StatusInternalServerError
 }
 
-func New(err_code Code, message string) *Error {
+func New(errCode Code, message string) *Error {
 	return &Error{
 		T:       time.Now().UnixMilli(),
 		Success: false,
-		ErrCode: err_code,
+		ErrCode: errCode,
 		Message: message,
 	}
 }
