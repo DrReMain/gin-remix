@@ -60,9 +60,10 @@ func inject(d *dataSources, cfg config.Config) (*gin.Engine, error) {
 
 	handler.NewHandler(&handler.Config{
 		R:               router,
-		UserService:     userService,
-		TimeoutDuration: time.Duration(cfg.HandlerTimeOut) * time.Second,
 		MaxBodyBytes:    cfg.MaxBodyBytes,
+		TimeoutDuration: time.Duration(cfg.HandlerTimeOut) * time.Second,
+
+		UserService: userService,
 	})
 
 	return router, nil

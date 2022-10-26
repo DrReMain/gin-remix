@@ -34,9 +34,7 @@ func NewHandler(c *Config) {
 	}
 
 	c.R.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "No route found.",
-		})
+		c.JSON(http.StatusNotFound, apperrors.NewNotFound("api", c.Request.RequestURI))
 	})
 
 	c.R.Use(static.Serve("/", static.LocalFile("./static", true)))

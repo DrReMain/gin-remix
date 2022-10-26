@@ -89,9 +89,7 @@ func Timeout(timeout time.Duration, errTimeout *apperrors.Error) gin.HandlerFunc
 		case <-panicChan:
 			e := apperrors.NewInternal()
 			tw.ResponseWriter.WriteHeader(e.Status())
-			eResp, _ := json.Marshal(gin.H{
-				"error": e,
-			})
+			eResp, _ := json.Marshal(e)
 			_, _ = tw.ResponseWriter.Write(eResp)
 		case <-finished:
 			tw.mu.Lock()
@@ -108,9 +106,7 @@ func Timeout(timeout time.Duration, errTimeout *apperrors.Error) gin.HandlerFunc
 			defer tw.mu.Unlock()
 			tw.ResponseWriter.Header().Set("Content-Type", "application/json")
 			tw.ResponseWriter.WriteHeader(errTimeout.Status())
-			eResp, _ := json.Marshal(gin.H{
-				"error": errTimeout,
-			})
+			eResp, _ := json.Marshal(errTimeout)
 			_, _ = tw.ResponseWriter.Write(eResp)
 			c.Abort()
 			tw.SetTimeout()

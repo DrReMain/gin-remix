@@ -4,20 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
-type Type string
+type Code string
 
 const (
-	Internal           Type = "INTERNAL"
-	NotFound           Type = "NOTFOUND"
-	BadRequest         Type = "BAD_REQUEST"
-	Authorization      Type = "AUTHORIZATION"
-	ServiceUnavailable Type = "SERVICE_UNAVAILABLE"
+	Internal           Code = "000000"
+	NotFound           Code = "000001"
+	BadRequest         Code = "000002"
+	Authorization      Code = "000003"
+	ServiceUnavailable Code = "000004"
 )
 
 type Error struct {
-	Type    Type   `json:"type"`
+	T       int64  `json:"t"`
+	Success bool   `json:"success"`
+	ErrCode Code   `json:"err_code"`
 	Message string `json:"message"`
 }
 
@@ -26,11 +29,17 @@ func (e *Error) Error() string {
 }
 
 func (e *Error) Status() int {
-	switch e.Type {
+	switch e.ErrCode {
 	case Internal:
 		return http.StatusInternalServerError
 	case NotFound:
 		return http.StatusNotFound
+	case BadRequest:
+		return http.StatusBadRequest
+	case Authorization:
+		return http.StatusUnauthorized
+	case ServiceUnavailable:
+		return http.StatusServiceUnavailable
 	default:
 		return http.StatusInternalServerError
 	}
@@ -44,37 +53,36 @@ func Status(err error) int {
 	return http.StatusInternalServerError
 }
 
-func NewInternal() *Error {
+func New(err_code Code, message string) *Error {
 	return &Error{
-		Type:    Internal,
-		Message: ServerError,
+		T:       time.Now().UnixMilli(),
+		Success: false,
+		ErrCode: err_code,
+		Message: message,
 	}
 }
 
-func NewNotFound(name string, value string) *Error {
-	return &Error{
-		Type:    NotFound,
-		Message: fmt.Sprintf("resource: %v with value: %v not found", name, value),
-	}
+func NewInternal() (e *Error) {
+	e = New(Internal, ServerError)
+	return
 }
 
-func NewBadRequest(reason string) *Error {
-	return &Error{
-		Type:    BadRequest,
-		Message: fmt.Sprintf("Bad request. Reason: %v", reason),
-	}
+func NewNotFound(name string, value string) (e *Error) {
+	e = New(NotFound, fmt.Sprintf("resource: (%v) with value (%v) not found", name, value))
+	return
 }
 
-func NewAuthorization(reason string) *Error {
-	return &Error{
-		Type:    Authorization,
-		Message: reason,
-	}
+func NewBadRequest(reason string) (e *Error) {
+	e = New(BadRequest, fmt.Sprintf("Bad request. Reason: (%v)", reason))
+	return
 }
 
-func NewServiceUnavailable() *Error {
-	return &Error{
-		Type:    ServiceUnavailable,
-		Message: "Service unavailable or timed out",
-	}
+func NewAuthorization(reason string) (e *Error) {
+	e = New(Authorization, reason)
+	return
+}
+
+func NewServiceUnavailable() (e *Error) {
+	e = New(ServiceUnavailable, "Service unavailable or timed out")
+	return
 }

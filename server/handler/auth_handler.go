@@ -8,6 +8,7 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"go-remix/model"
 	"go-remix/model/apperrors"
+	"go-remix/model/appresponse"
 	"log"
 	"net/http"
 	"strings"
@@ -107,7 +108,7 @@ func (h *Handler) Login(c *gin.Context) {
 
 	fmt.Println(user)
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, appresponse.New(user))
 }
 
 func (h *Handler) Logout(c *gin.Context) {
