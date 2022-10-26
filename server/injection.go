@@ -2,42 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
+
 	"go-remix/config"
 	"go-remix/handler"
-	"go-remix/model"
-	"go-remix/repository"
-	"go-remix/service"
-	"log"
-	"net/http"
-	"time"
 )
 
 func inject(d *dataSources, cfg config.Config) (*gin.Engine, error) {
-	log.Println("Injecting data sources")
-
-	userRepository := repository.NewUserRepository(d.DB)
-
-	redisRepository := repository.NewRedisRepository(d.RedisClient)
-	mailRepository := repository.NewMailRepository(cfg.MailUser, cfg.MailPassword, cfg.CorsOrigin)
-
-	userService := service.NewUserService(&service.USConfig{
-		UserRepository:  userRepository,
-		RedisRepository: redisRepository,
-		MailRepository:  mailRepository,
-	})
+	log.Println("注入数据源")
 
 	router := gin.Default()
 
-	c := cors.New(cors.Options{
+	router.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{cfg.CorsOrigin},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
-	})
-	router.Use(c)
+	}))
 
 	redisURL := d.RedisClient.Options().Addr
 	password := d.RedisClient.Options().Password
@@ -54,16 +41,12 @@ func inject(d *dataSources, cfg config.Config) (*gin.Engine, error) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
-	router.Use(sessions.Sessions(model.CookieName, store))
-
-	// TODO: ws
+	router.Use(sessions.Sessions("go-remix", store))
 
 	handler.NewHandler(&handler.Config{
 		R:               router,
 		MaxBodyBytes:    cfg.MaxBodyBytes,
 		TimeoutDuration: time.Duration(cfg.HandlerTimeOut) * time.Second,
-
-		UserService: userService,
 	})
 
 	return router, nil

@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"go-remix/config"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
+	"go-remix/config"
 )
 
 func main() {
@@ -19,7 +21,7 @@ func main() {
 	if gin.Mode() != gin.ReleaseMode {
 		err := godotenv.Load()
 		if err != nil {
-			log.Fatalln("Error loading .env file")
+			log.Fatalln("加载 .env 文件错误")
 		}
 	}
 
@@ -27,17 +29,17 @@ func main() {
 
 	cfg, err := config.LoadConfig(ctx)
 	if err != nil {
-		log.Fatalf("Could not load the config: %v\n", err)
+		log.Fatalf("加载配置错误: %v\n", err)
 	}
 
 	ds, err := initDS(ctx, cfg)
 	if err != nil {
-		log.Fatalf("Unable to initialize data sources: %v\n", err)
+		log.Fatalf("初始化数据源错误: %v\n", err)
 	}
 
 	router, err := inject(ds, cfg)
 	if err != nil {
-		log.Fatalf("Failure to inject data sources: %v\n", err)
+		log.Fatalf("路由注入数据源错误: %v\n", err)
 	}
 
 	srv := &http.Server{
@@ -46,7 +48,7 @@ func main() {
 	}
 	go func() {
 		if err = srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Failed to initialize server: %v\n", err)
+			log.Fatalf("初始化服务器错误: %v\n", err)
 		}
 	}()
 
@@ -63,8 +65,8 @@ func main() {
 		log.Fatalf("A problem occurred gracefully shutting down data sources: %v\n", err)
 	}
 
-	log.Println("shutting down server...")
+	log.Println("关闭服务器...")
 	if err = srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v\n", err)
+		log.Fatalf("服务器强制关闭错误: %v\n", err)
 	}
 }
