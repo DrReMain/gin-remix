@@ -7,6 +7,9 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+
+	"go-remix/appo"
+	"go-remix/middleware"
 	"go-remix/model"
 )
 
@@ -27,22 +30,16 @@ func NewHandler(c *Config) {
 	}
 
 	c.R.NoRoute(func(c *gin.Context) {
-		//c.JSON(http.StatusNotFound, apperrors.NewNotFound("api", c.Request.RequestURI))
+		c.JSON(http.StatusNotFound, appo.NewNotFound("api", c.Request.RequestURI))
 	})
 
 	if gin.Mode() != gin.TestMode {
-		//c.R.Use(middleware.Timeout(c.TimeoutDuration, apperrors.NewServiceUnavailable()))
+		c.R.Use(middleware.Timeout(c.TimeoutDuration, appo.NewServiceUnavailable()))
 	}
 
 	ag := c.R.Group("api/account")
 	ag.GET("/", func(context *gin.Context) {
-		context.JSON(http.StatusOK, gin.H{
-			"t":        time.Now().UnixMilli(),
-			"success":  true,
-			"result":   nil,
-			"err_code": "000000",
-			"message":  "ok",
-		})
+		context.JSON(http.StatusOK, appo.NewSuccess("ok"))
 	})
 }
 
