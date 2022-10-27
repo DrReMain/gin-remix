@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 
 	"go-remix/appo"
+	"go-remix/config"
 	"go-remix/middleware"
 	"go-remix/model"
 )
@@ -18,29 +20,26 @@ type Handler struct {
 	MaxBodyBytes int64
 }
 
-type Config struct {
-	R               *gin.Engine
-	TimeoutDuration time.Duration
-	MaxBodyBytes    int64
-}
-
-func NewHandler(c *Config) {
+func InjectRouter(c *gin.Engine, cfg config.Config) {
 	_ = &Handler{
-		MaxBodyBytes: c.MaxBodyBytes,
+		MaxBodyBytes: cfg.MaxBodyBytes,
 	}
 
-	c.R.NoRoute(func(c *gin.Context) {
+	// 不存在路由处理
+	c.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, appo.NewNotFound("api", c.Request.RequestURI))
 	})
 
+	// 静态文件处理
+	c.Use(static.Serve("/", static.LocalFile("./static", true)))
+
+	// 超时中间件
 	if gin.Mode() != gin.TestMode {
-		c.R.Use(middleware.Timeout(c.TimeoutDuration, appo.NewServiceUnavailable()))
+		c.Use(middleware.Timeout(time.Duration(cfg.HandlerTimeOut)*time.Second, appo.NewServiceUnavailable()))
 	}
 
-	ag := c.R.Group("api/account")
-	ag.GET("/", func(context *gin.Context) {
-		context.JSON(http.StatusOK, appo.NewSuccess("ok"))
-	})
+	//ag := c.Group("api/account")
+	//ag.POST("/register", h.Register)
 }
 
 func setUserSession(c *gin.Context, id string) {

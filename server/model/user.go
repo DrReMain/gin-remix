@@ -22,8 +22,5 @@ type UserService interface {
 }
 
 type UserRepository interface {
-	FindById(id string) (*User, error)
 	Create(user *User) (*User, error)
-	FindByEmail(email string) (*User, error)
-	Update(user *User) error
 }

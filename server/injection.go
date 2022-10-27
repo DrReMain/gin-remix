@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net/http"
-	"time"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
+	"log"
+	"net/http"
 
 	"go-remix/config"
 	"go-remix/handler"
@@ -43,11 +41,7 @@ func inject(d *dataSources, cfg config.Config) (*gin.Engine, error) {
 	})
 	router.Use(sessions.Sessions("go-remix", store))
 
-	handler.NewHandler(&handler.Config{
-		R:               router,
-		MaxBodyBytes:    cfg.MaxBodyBytes,
-		TimeoutDuration: time.Duration(cfg.HandlerTimeOut) * time.Second,
-	})
+	handler.InjectRouter(router, cfg)
 
 	return router, nil
 }
