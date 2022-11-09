@@ -48,11 +48,35 @@ func NewHandler(c *Config) {
 	ag := c.R.Group("api/v1/ygg")
 	ag.POST("/user/register", h.Register)
 	ag.POST("/login/passwd", h.Login)
+
+	ag.Use(middleware.AuthMiddleware())
+	ag.GET("/user/info", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"result": gin.H{
+				"id":               "150000200503064268",
+				"name":             "尸佼",
+				"avatar":           "http://dummyimage.com/64x64/FF6600",
+				"email":            "drremain@crew4dance.com",
+				"job":              "frontend",
+				"jobName":          "前端开发工程师",
+				"organization":     "Frontend",
+				"organizationName": "前端组",
+				"location":         "hangzhou",
+				"locationName":     "杭州",
+				"introduction":     "三算它白精准资影过南再战入。",
+				"contact":          "13512344321",
+				"lastLoginTime":    337922163112,
+				"hiredType":        998071869408,
+				"permissions":      "*",
+			},
+		})
+	})
 }
 
-func setUserSession(c *gin.Context, id string) {
+func setUserSession(c *gin.Context, token string) {
 	session := sessions.Default(c)
-	session.Set("userId", id)
+	session.Set("access_token", token)
 	if err := session.Save(); err != nil {
 		log.Printf("配置session错误: %v\n", err.Error())
 	}

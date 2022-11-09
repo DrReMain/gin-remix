@@ -6,6 +6,8 @@ import (
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"go-remix/appo"
 	"go-remix/model"
+	"go-remix/utils"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -93,5 +95,16 @@ func (h *Handler) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, appo.NewSuccess(user))
+	token, err := utils.ReleaseToken(*user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, appo.NewInternal())
+		log.Printf("token generate error: %v", err)
+		return
+	}
+
+	setUserSession(c, token)
+
+	c.JSON(http.StatusOK, appo.NewSuccess(gin.H{
+		"accessToken": token,
+	}))
 }
