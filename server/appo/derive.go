@@ -37,3 +37,11 @@ func NewServiceUnavailable() *FailResponse {
 func NewNotFound(name, value string) *FailResponse {
 	return NewFail(NotFound, fmt.Sprintf("resource: %v with value: %v not found", name, value))
 }
+
+func NewBadRequest(reason string) *FailResponse {
+	return NewFail(BadRequest, fmt.Sprintf("Bad request. Reason: %v", reason))
+}
+
+func NewAuthorization(reason string) *FailResponse {
+	return NewFail(Authorization, reason)
+}

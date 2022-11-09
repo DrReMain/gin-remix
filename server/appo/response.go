@@ -8,7 +8,7 @@ type BaseResponse struct {
 type FailResponse struct {
 	BaseResponse
 	ErrCode string `json:"err_code"`
-	Message string `json:"message"`
+	Message string `json:"msg"`
 }
 
 type SuccessResponse struct {

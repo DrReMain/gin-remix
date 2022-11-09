@@ -9,6 +9,8 @@ const (
 	Internal           = "000001"
 	ServiceUnavailable = "000002"
 	NotFound           = "000003"
+	BadRequest         = "000004"
+	Authorization      = "000005"
 )
 
 func (r *FailResponse) Error() string {
@@ -17,14 +19,18 @@ func (r *FailResponse) Error() string {
 
 func (r *FailResponse) Status() int {
 	switch r.ErrCode {
-	case Internal:
-		return http.StatusInternalServerError
-	case ServiceUnavailable:
-		return http.StatusServiceUnavailable
-	case NotFound:
-		return http.StatusNotFound
+	//case Internal:
+	//	return http.StatusInternalServerError
+	//case ServiceUnavailable:
+	//	return http.StatusServiceUnavailable
+	//case NotFound:
+	//	return http.StatusNotFound
+	//case BadRequest:
+	//	return http.StatusBadRequest
+	//case Authorization:
+	//	return http.StatusUnauthorized
 	default:
-		return http.StatusInternalServerError
+		return http.StatusOK
 	}
 }
 

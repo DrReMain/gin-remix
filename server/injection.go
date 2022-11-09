@@ -2,20 +2,30 @@ package main
 
 import (
 	"fmt"
+	"go-remix/service"
+	"log"
+	"net/http"
+	"time"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
-	"log"
-	"net/http"
 
 	"go-remix/config"
 	"go-remix/handler"
+	"go-remix/repository"
 )
 
 func inject(d *dataSources, cfg config.Config) (*gin.Engine, error) {
 	log.Println("注入数据源")
+	userRepository := repository.NewUserRepository(d.DB)
 
+	userService := service.NewUserService(&service.UserService{
+		UserRepository: userRepository,
+	})
+
+	// initialize gin.Engine
 	router := gin.Default()
 
 	router.Use(cors.New(cors.Options{
@@ -41,7 +51,12 @@ func inject(d *dataSources, cfg config.Config) (*gin.Engine, error) {
 	})
 	router.Use(sessions.Sessions("go-remix", store))
 
-	handler.InjectRouter(router, cfg)
+	handler.NewHandler(&handler.Config{
+		TimeoutDuration: time.Duration(cfg.HandlerTimeOut) * time.Second,
+		MaxBodyBytes:    cfg.MaxBodyBytes,
+		R:               router,
+		UserService:     userService,
+	})
 
 	return router, nil
 }
